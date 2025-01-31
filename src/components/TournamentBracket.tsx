@@ -1,9 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { db } from "@/lib/firebase";
-import { doc, updateDoc } from "firebase/firestore";
-import {Match} from "@/types/match";
+import { updateBracket } from "@/lib/tournaments";
+import { Match } from "@/types/match";
 
 interface TournamentBracketProps {
     tournamentId: string;
@@ -17,26 +16,8 @@ const TournamentBracket = ({ tournamentId, rounds }: TournamentBracketProps) => 
         const newRounds = [...updatedRounds];
         newRounds[roundIndex][matchIndex] = { ...newRounds[roundIndex][matchIndex], scoreA, scoreB };
 
-        // Determinar ganador
-        if (scoreA !== scoreB) {
-            const winner = scoreA > scoreB ? newRounds[roundIndex][matchIndex].teamA : newRounds[roundIndex][matchIndex].teamB;
-
-            // Si hay una siguiente ronda, agregar ganador
-            if (newRounds[roundIndex + 1]) {
-                newRounds[roundIndex + 1].push({ teamA: winner, teamB: "" });
-            } else {
-                newRounds.push([{ teamA: winner, teamB: "" }]);
-            }
-        }
-
         setUpdatedRounds(newRounds);
-
-        try {
-            const docRef = doc(db, "tournaments", tournamentId);
-            await updateDoc(docRef, { bracket: newRounds });
-        } catch (error) {
-            console.error("Error al actualizar bracket:", error);
-        }
+        await updateBracket(tournamentId, { rounds: newRounds });
     };
 
     return (

@@ -2,11 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { db } from "@/lib/firebase";
-import { doc, getDoc } from "firebase/firestore";
+import { getTournament } from "@/lib/tournaments";
 import LeagueTable from "@/components/LeagueTable";
 import TournamentBracket from "@/components/TournamentBracket";
-import {Tournament} from "@/types/tournament";
+import { Tournament } from "@/types/tournament";
 
 export default function TournamentPage() {
     const { id } = useParams();
@@ -17,20 +16,10 @@ export default function TournamentPage() {
         if (!id) return;
 
         const fetchTournament = async () => {
-            try {
-                const docRef = doc(db, "tournaments", id as string);
-                const docSnap = await getDoc(docRef);
-
-                if (docSnap.exists()) {
-                    setTournament({ id, ...docSnap.data() } as Tournament);
-                } else {
-                    console.error("No se encontró el torneo.");
-                }
-            } catch (error) {
-                console.error("Error obteniendo el torneo:", error);
-            } finally {
-                setLoading(false);
-            }
+            setLoading(true);
+            const data = await getTournament(id as string);
+            setTournament(data);
+            setLoading(false);
         };
 
         fetchTournament();
@@ -45,17 +34,16 @@ export default function TournamentPage() {
 
             {tournament.type === "league" ? (
                 <LeagueTable
-                    teams={tournament.teams}
+                    teams={tournament.teams || []}
                     tournamentId={tournament.id}
-                    matches={tournament.matches || []}
+                    matches={tournament.matches ?? []}
                 />
             ) : (
                 <TournamentBracket
                     tournamentId={tournament.id}
-                    rounds={tournament.bracket?.rounds || []}
+                    rounds={tournament.bracket?.rounds ?? []}
                 />
             )}
-
         </div>
     );
 }

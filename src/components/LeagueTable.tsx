@@ -1,9 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { db } from "@/lib/firebase";
-import { doc, updateDoc } from "firebase/firestore";
-import {Match} from "@/types/match";
+import { updateMatchResults } from "@/lib/tournaments";
+import { Match } from "@/types/match";
 
 interface LeagueTableProps {
     teams: string[];
@@ -25,38 +24,29 @@ const LeagueTable = ({ teams, tournamentId, matches }: LeagueTableProps) => {
             updatedMatches.forEach(({ teamA, teamB, scoreA, scoreB }) => {
                 if (scoreA !== undefined && scoreB !== undefined) {
                     if (scoreA > scoreB) {
-                        pointsMap[teamA] += 3; // Gana teamA
+                        pointsMap[teamA] += 3;
                     } else if (scoreA < scoreB) {
-                        pointsMap[teamB] += 3; // Gana teamB
+                        pointsMap[teamB] += 3;
                     } else {
-                        pointsMap[teamA] += 1; // Empate
+                        pointsMap[teamA] += 1;
                         pointsMap[teamB] += 1;
                     }
                 }
             });
 
-            const sortedStandings = Object.entries(pointsMap)
-                .map(([team, points]) => ({ team, points }))
-                .sort((a, b) => b.points - a.points);
-
-            setStandings(sortedStandings);
+            setStandings(Object.entries(pointsMap).map(([team, points]) => ({ team, points })));
         };
 
         calculateStandings();
     }, [updatedMatches, teams]);
 
-    // Función para actualizar los resultados en Firestore
+    // Actualizar resultados de Firestore usando la función centralizada
     const updateMatch = async (index: number, scoreA: number, scoreB: number) => {
         const newMatches = [...updatedMatches];
         newMatches[index] = { ...newMatches[index], scoreA, scoreB };
         setUpdatedMatches(newMatches);
 
-        try {
-            const docRef = doc(db, "tournaments", tournamentId);
-            await updateDoc(docRef, { matches: newMatches });
-        } catch (error) {
-            console.error("Error al actualizar resultados:", error);
-        }
+        await updateMatchResults(tournamentId, newMatches);
     };
 
     return (
@@ -78,29 +68,6 @@ const LeagueTable = ({ teams, tournamentId, matches }: LeagueTableProps) => {
                 ))}
                 </tbody>
             </table>
-
-            <h3 className="text-lg font-semibold mt-4">Resultados</h3>
-            <ul>
-                {updatedMatches.map((match, index) => (
-                    <li key={index} className="mb-2 flex gap-2">
-                        <span>{match.teamA}</span>
-                        <input
-                            type="number"
-                            className="w-12 border p-1"
-                            value={match.scoreA || ""}
-                            onChange={(e) => updateMatch(index, Number(e.target.value), match.scoreB || 0)}
-                        />
-                        <span>-</span>
-                        <input
-                            type="number"
-                            className="w-12 border p-1"
-                            value={match.scoreB || ""}
-                            onChange={(e) => updateMatch(index, match.scoreA || 0, Number(e.target.value))}
-                        />
-                        <span>{match.teamB}</span>
-                    </li>
-                ))}
-            </ul>
         </div>
     );
 };
