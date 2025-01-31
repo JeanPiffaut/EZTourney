@@ -4,7 +4,7 @@ import { useState } from "react";
 import { db } from "@/lib/firebase";
 import { collection, addDoc } from "firebase/firestore";
 
-const Form = () => {
+const Form = ({ onTournamentCreated }: { onTournamentCreated?: (id: string) => void }) => {
     const [name, setName] = useState("");
     const [type, setType] = useState("league");
     const [teams, setTeams] = useState<string[]>([]);
@@ -26,7 +26,7 @@ const Form = () => {
         }
 
         try {
-            await addDoc(collection(db, "tournaments"), {
+            const docRef = await addDoc(collection(db, "tournaments"), {
                 name,
                 type,
                 teams,
@@ -36,6 +36,10 @@ const Form = () => {
             setName("");
             setType("league");
             setTeams([]);
+
+            if (onTournamentCreated) {
+                onTournamentCreated(docRef.id);
+            }
         } catch (error) {
             console.error("Error al guardar el torneo:", error);
             alert("Error al guardar el torneo.");
