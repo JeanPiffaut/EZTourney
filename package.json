@@ -6,7 +6,11 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "serve": "firebase emulators:start",
+    "shell": "firebase functions:shell",
+    "deploy": "firebase deploy",
+    "logs": "firebase functions:log"
   },
   "dependencies": {
     "firebase": "^11.2.0",
