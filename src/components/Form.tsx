@@ -10,7 +10,6 @@ const Form = ({ onTournamentCreated }: { onTournamentCreated?: (id: string) => v
     const [teams, setTeams] = useState<string[]>([]);
     const [teamInput, setTeamInput] = useState("");
 
-    // Agregar equipo a la lista
     const addTeam = () => {
         if (teamInput.trim() !== "" && !teams.includes(teamInput.trim())) {
             setTeams([...teams, teamInput.trim()]);
@@ -18,10 +17,9 @@ const Form = ({ onTournamentCreated }: { onTournamentCreated?: (id: string) => v
         }
     };
 
-    // Guardar torneo en Firestore
     const saveTournament = async () => {
         if (!name || teams.length < 2) {
-            alert("Ingresa un nombre y al menos dos equipos.");
+            alert("Please enter a name and at least two teams.");
             return;
         }
 
@@ -32,87 +30,102 @@ const Form = ({ onTournamentCreated }: { onTournamentCreated?: (id: string) => v
                 teams,
                 createdAt: new Date().toISOString(),
             });
-            alert("Torneo creado con éxito.");
+            alert("Tournament created successfully!");
             setName("");
             setType("league");
             setTeams([]);
-
             if (onTournamentCreated) {
                 onTournamentCreated(docRef.id);
             }
         } catch (error) {
-            console.error("Error al guardar el torneo:", error);
-            alert("Error al guardar el torneo.");
+            console.error("Error saving tournament:", error);
+            alert("Error saving the tournament.");
         }
     };
 
     return (
-        <div className="max-w-lg mx-auto bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-xl font-bold mb-4">Crear Torneo</h2>
+        <div className="max-w-lg mx-auto bg-gray-900 text-white p-6 rounded-lg shadow-lg border border-gray-700">
+            <h2 className="text-2xl font-bold mb-6 text-center">Create Tournament</h2>
 
-            {/* Nombre del Torneo */}
+            {/* Tournament Name */}
+            <label className="block text-sm font-medium mb-1">Tournament Name</label>
             <input
                 type="text"
-                placeholder="Nombre del torneo"
+                placeholder="Enter tournament name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full p-2 border rounded mb-4"
+                className="w-full p-3 rounded-md bg-gray-800 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 mb-4"
             />
 
-            {/* Tipo de Torneo */}
+            {/* Tournament Type */}
             <div className="mb-4">
-                <label className="mr-4">
-                    <input
-                        type="radio"
-                        value="league"
-                        checked={type === "league"}
-                        onChange={() => setType("league")}
-                    />
-                    Liga
-                </label>
-                <label>
-                    <input
-                        type="radio"
-                        value="elimination"
-                        checked={type === "elimination"}
-                        onChange={() => setType("elimination")}
-                    />
-                    Eliminación
-                </label>
+                <label className="block text-sm font-medium mb-1">Tournament Type</label>
+                <div className="flex items-center gap-4">
+                    <label className="flex items-center cursor-pointer">
+                        <input
+                            type="radio"
+                            value="league"
+                            checked={type === "league"}
+                            onChange={() => setType("league")}
+                            className="form-radio text-indigo-500 focus:ring-indigo-500"
+                        />
+                        <span className="ml-2">League</span>
+                    </label>
+                    <label className="flex items-center cursor-pointer">
+                        <input
+                            type="radio"
+                            value="elimination"
+                            checked={type === "elimination"}
+                            onChange={() => setType("elimination")}
+                            className="form-radio text-indigo-500 focus:ring-indigo-500"
+                        />
+                        <span className="ml-2">Elimination</span>
+                    </label>
+                </div>
             </div>
 
-            {/* Equipos */}
-            <div className="mb-4">
+            {/* Add Teams */}
+            <label className="block text-sm font-medium mb-1">Add Team</label>
+            <div className="flex gap-2 mb-4">
                 <input
                     type="text"
-                    placeholder="Nombre del equipo"
+                    placeholder="Enter team name"
                     value={teamInput}
                     onChange={(e) => setTeamInput(e.target.value)}
-                    className="w-full p-2 border rounded"
+                    className="w-full p-3 rounded-md bg-gray-800 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
                 <button
                     onClick={addTeam}
-                    className="mt-2 bg-blue-500 text-white px-4 py-2 rounded"
+                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition duration-200"
                 >
-                    Agregar Equipo
+                    Add
                 </button>
             </div>
 
-            {/* Lista de Equipos */}
-            <ul className="mb-4">
+            {/* Team List */}
+            <ul className="space-y-2 mb-4">
                 {teams.map((team, index) => (
-                    <li key={index} className="p-1 border-b">
+                    <li
+                        key={index}
+                        className="flex justify-between items-center p-2 bg-gray-800 border border-gray-700 rounded-md"
+                    >
                         {team}
+                        <button
+                            onClick={() => setTeams(teams.filter((_, i) => i !== index))}
+                            className="text-red-500 hover:text-red-700 transition"
+                        >
+                            ✕
+                        </button>
                     </li>
                 ))}
             </ul>
 
-            {/* Botón de Guardar */}
+            {/* Save Button */}
             <button
                 onClick={saveTournament}
-                className="w-full bg-green-500 text-white px-4 py-2 rounded"
+                className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-md transition duration-200"
             >
-                Guardar Torneo
+                Save Tournament
             </button>
         </div>
     );
