@@ -7,7 +7,7 @@ export default function Home() {
     const router = useRouter();
 
     return (
-        <main className="flex flex-col justify-center items-center min-h-screen bg-gray-100">
+        <main className="flex flex-col justify-center items-center min-h-screen">
             <Form onTournamentCreated={(id) => router.push(`/tournament/${id}`)} />
         </main>
     );
